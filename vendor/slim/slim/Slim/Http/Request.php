@@ -248,12 +248,9 @@ class Request extends Message implements ServerRequestInterface
             if ($customMethod) {
                 $this->method = $this->filterMethod($customMethod);
             } elseif ($this->originalMethod === 'POST') {
-                $body = $this->getParsedBody();
-
-                if (is_object($body) && property_exists($body, '_METHOD')) {
-                    $this->method = $this->filterMethod((string)$body->_METHOD);
-                } elseif (is_array($body) && isset($body['_METHOD'])) {
-                    $this->method = $this->filterMethod((string)$body['_METHOD']);
+                $overrideMethod = $this->filterMethod($this->getParsedBodyParam('_METHOD'));
+                if ($overrideMethod !== null) {
+                    $this->method = $overrideMethod;
                 }
 
                 if ($this->getBody()->eof()) {
@@ -685,6 +682,27 @@ class Request extends Message implements ServerRequestInterface
     }
 
     /**
+     * Fetch cookie value from cookies sent by the client to the server.
+     *
+     * Note: This method is not part of the PSR-7 standard.
+     *
+     * @param string $key     The attribute name.
+     * @param mixed  $default Default value to return if the attribute does not exist.
+     *
+     * @return mixed
+     */
+    public function getCookieParam($key, $default = null)
+    {
+        $cookies = $this->getCookieParams();
+        $result = $default;
+        if (isset($cookies[$key])) {
+            $result = $cookies[$key];
+        }
+
+        return $result;
+    }
+
+    /**
      * Return an instance with the specified cookies.
      *
      * The data IS NOT REQUIRED to come from the $_COOKIE superglobal, but MUST
@@ -826,6 +844,22 @@ class Request extends Message implements ServerRequestInterface
     public function getServerParams()
     {
         return $this->serverParams;
+    }
+
+    /**
+     * Retrieve a server parameter.
+     *
+     * Note: This method is not part of the PSR-7 standard.
+     *
+     * @param  string $key
+     * @param  mixed  $default
+     * @return mixed
+     */
+    public function getServerParam($key, $default = null)
+    {
+        $serverParams = $this->getServerParams();
+
+        return isset($serverParams[$key]) ? $serverParams[$key] : $default;
     }
 
     /*******************************************************************************
