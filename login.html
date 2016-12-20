@@ -1,0 +1,54 @@
+<html>
+<script src="lib/jquery-2.2.4.min.js" ></script>
+<script>
+    var getUserData = function(){
+        var hash = location.hash;
+        var hashAr = hash.split('=');
+        var instaurl = 'https://api.instagram.com/v1/users/self?access_token='+hashAr[1];
+        $.ajax({
+          method: "GET",
+          url: instaurl,
+          crossDomain: true,
+          dataType: "jsonp",
+          success: function(response){
+              if( response.meta.code == 200 ){
+                  createSession( response.data, hashAr[1] );
+              }
+              console.log( response );
+          }
+        });
+    }
+    
+    var createSession = function( result, accessToken ){
+        localStorage.setItem('instaToken', accessToken );
+        var data = {
+            'full_name': result.full_name,
+            'access_token': accessToken,
+            'username': result.username,
+            'bio': result.bio,
+            'website': result.website,
+		    'profile_picture': result.profile_picture, 
+            'userid': result.id
+        };
+        $.ajax({
+          method: "POST",
+          url: "http://localhost/index.php/session",
+          data: data,
+          dataType: "json",
+          success: function(response){
+            if( response.result ){
+                location.href = "http://localhost/feed.html";
+            } else {
+                location.href = "http://localhost/index.html";
+            }
+            
+          }
+        });
+    }
+    
+    $(document).ready(function(){
+        getUserData();
+    });
+</script>
+    
+</html>

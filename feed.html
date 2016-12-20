@@ -1,0 +1,48 @@
+<html>
+<script src="lib/jquery-2.2.4.min.js" ></script>
+<style>
+    .instaImg {
+        height: 240;
+        width: 240;
+        padding: 100 100 100 100;
+        margin-left: 450;
+    }
+</style>
+<script>
+    
+    $(document).ready(function(){
+        var accessToken = localStorage.getItem('instaToken');
+        if( accessToken != null ){
+            var url = "https://api.instagram.com/v1/users/self/media/recent/?access_token="+accessToken;
+            getFeed(url);
+        } else {
+            location.href='http://localhost/index.php/login';
+        }
+    });
+    
+    var getFeed = function( feedUrl ){
+       $.ajax({
+          method: "GET",
+          url: feedUrl,
+          crossDomain: true,
+          dataType: "jsonp",
+          success: function(response){
+              if( response.meta.code == 200 ){
+                  $.each( response.data, function( key, obj ){
+                    var imgObj = obj.images.low_resolution;
+                    var imageHtml = '<div class="instaImg"><a href="'+obj.images.standard_resolution.url+'">';
+                    imageHtml += '<img src="'+imgObj.url+'" alt="Smiley face" height="'+imgObj.height+'" width="'+imgObj.width+'"></a></div>';
+                    $("#instaFeed").append( imageHtml );
+                  });
+              }
+              console.log( response );
+          }
+        }); 
+    }
+</script>
+<body>
+    <div id="instaFeed">
+        
+    </div>
+</body>
+</html>

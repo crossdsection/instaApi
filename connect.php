@@ -1,8 +1,8 @@
 <?php
 
 define("DBNAME", "test");
-define("USERNAME", "cross");
-define("PASSWORD", "password");
+define("USERNAME", "root");
+define("PASSWORD", "");
 define("HOST", "localhost");
 
 // Create connection
